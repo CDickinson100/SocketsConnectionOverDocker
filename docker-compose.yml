@@ -1,0 +1,31 @@
+version: '2'
+
+services:
+  server:
+    image: bitnami/dotnet-sdk
+    working_dir: /app
+    command: "./run.sh Server"
+    volumes:
+      - "./:/app:rw"
+    ports:
+      - 28117:28117
+    healthcheck:
+      test: curl --fail -k https://localhost:8080/health || exit 1
+      interval: 30s
+      timeout: 30s
+      retries: 3
+      
+  client:
+    image: bitnami/dotnet-sdk
+    working_dir: /app
+    command: "./run.sh Client"
+    depends_on:
+      server:
+        condition: service_healthy
+    volumes:
+      - "./:/app:rw"
+    healthcheck:
+      test: curl --fail -k https://localhost:8081/health || exit 1
+      interval: 30s
+      timeout: 30s
+      retries: 3
